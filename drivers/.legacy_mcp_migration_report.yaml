@@ -1,0 +1,6 @@
+migrated:
+- client_key: tavily_search
+  card_path: /run/csi/mount-root/nas/4079184d856ecc166ed19d4887083405/workspaces/default/drivers/mcp/tavily_search.yaml
+  credential_ref: mcp/tavily_search
+skipped: []
+warnings: []

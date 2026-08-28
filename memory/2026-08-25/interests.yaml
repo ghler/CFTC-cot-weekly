@@ -1,0 +1,57 @@
+date: '2026-08-25'
+topic_count: 3
+diversity_days: 7
+topics:
+- title: Cloudflare Workers as proxy deployment platform pattern
+  reason: Multiple repos in the dataset use Cloudflare Workers/Pages for VLESS/Trojan/Warp
+    proxy deployment (BPB-Worker-Panel, CF-Workers-Pages-VLESSproxy, sublink-worker).
+    Represents a reusable architecture pattern for serverless proxy hosting.
+  evidence: At least 3 repos explicitly use Cloudflare Workers for proxy subscription/panel
+    deployment; several 'one-click' scripts target Cloudflare
+  keywords:
+  - cloudflare-workers
+  - cloudflare-pages
+  - vless
+  - trojan
+  - warp
+  - serverless-proxy
+  - proxy-deployment
+  paths:
+  - memory/2026-08-25/github-repos-ghler-summary.md
+- title: One-click deployment scripts across platforms (Heroku, Google IDX, Cloudflare)
+  reason: Recurring pattern of 'one-click' / 'non-interactive' deployment scripts
+    for proxy services on various free-tier platforms. Could be a reusable template
+    or strategy for low-cost proxy hosting.
+  evidence: ArgoSB (Google IDX), HerokuXray (Heroku), multiple Cloudflare Workers
+    scripts, LWnodejsargo (Argo tunnel)
+  keywords:
+  - one-click-deploy
+  - heroku
+  - google-idx
+  - cloudflare
+  - argo-tunnel
+  - free-tier-hosting
+  - proxy-scripts
+  paths:
+  - memory/2026-08-25/github-repos-ghler-summary.md
+- title: GitHub user ghler's proxy/VPN & self-hosted service repository collection
+  reason: User fetched and summarized 32 repos from this account, showing sustained
+    interest in the 'internet freedom' / self-hosted tooling ecosystem. Could indicate
+    ongoing research or personal use of these tools.
+  evidence: 32 public repos covering V2Ray/Xray/sing-box/hysteria, Cloudflare Workers
+    proxy scripts, ChatGPT/Bing mirrors, IPTV/media streaming, one-click deployment
+    scripts for Heroku/Google IDX/Cloudflare
+  keywords:
+  - github
+  - proxy
+  - vpn
+  - v2ray
+  - xray
+  - sing-box
+  - hysteria
+  - cloudflare-workers
+  - self-hosted
+  - iptv
+  - chatgpt-mirror
+  paths:
+  - memory/2026-08-25/github-repos-ghler-summary.md

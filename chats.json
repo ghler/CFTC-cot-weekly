@@ -1,0 +1,50 @@
+{
+  "chats": [
+    {
+      "archived": false,
+      "archived_at": null,
+      "channel": "console",
+      "created_at": "2026-08-25T16:05:18.894953Z",
+      "id": "8865d654-4514-421c-8599-7824fe5f1cc5",
+      "meta": {},
+      "name": "pls show m",
+      "pinned": false,
+      "session_id": "1787673648300-byb9cih",
+      "source": "chat",
+      "status": "idle",
+      "updated_at": "2026-08-25T16:06:04.464762Z",
+      "user_id": "default"
+    },
+    {
+      "archived": false,
+      "archived_at": null,
+      "channel": "console",
+      "created_at": "2026-08-25T16:06:30.749399Z",
+      "id": "1a135438-8eb2-4daf-837a-04b374c547f2",
+      "meta": {},
+      "name": "Can you te",
+      "pinned": false,
+      "session_id": "1787673986939-jjgeo2w",
+      "source": "chat",
+      "status": "idle",
+      "updated_at": "2026-08-25T16:06:30.801640Z",
+      "user_id": "default"
+    },
+    {
+      "archived": false,
+      "archived_at": null,
+      "channel": "console",
+      "created_at": "2026-08-25T16:08:19.331576Z",
+      "id": "8993988b-8bd1-41b4-a717-39d234e9cc3e",
+      "meta": {},
+      "name": "Starting a New Journey",
+      "pinned": false,
+      "session_id": "1787674092506-wgen8wd",
+      "source": "chat",
+      "status": "idle",
+      "updated_at": "2026-08-28T08:37:36.957972Z",
+      "user_id": "default"
+    }
+  ],
+  "version": 1
+}

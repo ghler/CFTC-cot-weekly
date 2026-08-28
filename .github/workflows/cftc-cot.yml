@@ -1,0 +1,65 @@
+name: CFTC COT Weekly Update
+
+on:
+  schedule:
+    # Runs Friday 20:00 UTC (4:00 PM ET) - after CFTC publishes ~3:30 PM ET
+    - cron: '0 20 * * 5'
+  workflow_dispatch:  # Manual trigger from Actions tab
+
+jobs:
+  update-cot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # To commit updated master file
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0  # Need full history for commit
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      
+      - name: Run COT automation
+        run: python cftc_cot_automation.py
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet data/cot_master.xlsx; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes to commit"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected"
+          fi
+      
+      - name: Commit and push updated master file
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cot_master.xlsx
+          git commit -m "chore: update COT data $(date +'%Y-%m-%d')"
+          git push
+      
+      - name: Summary
+        run: |
+          echo "## CFTC COT Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date**: $(date -u +'%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check_changes.outputs.changed }}" = "true" ]; then
+            echo "- **Status**: ✅ New data committed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status**: ℹ️ No new data (already up to date)" >> $GITHUB_STEP_SUMMARY
+          fi
