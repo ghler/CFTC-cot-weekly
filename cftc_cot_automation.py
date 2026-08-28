@@ -83,7 +83,9 @@ def read_cftc_xls(xls_path: Path) -> pd.DataFrame:
 def filter_target_codes(df: pd.DataFrame) -> pd.DataFrame:
     """Extract rows for all target market codes, keeping ALL columns."""
     # Match by CFTC_Contract_Market_Code (exact string match)
-    mask = df["CFTC_Contract_Market_Code"].astype(str).str.strip().isin(TARGET_CODES)
+    # Normalize to 6-digit strings with leading zeros
+    df["CFTC_Contract_Market_Code"] = df["CFTC_Contract_Market_Code"].astype(str).str.strip().str.zfill(6)
+    mask = df["CFTC_Contract_Market_Code"].isin(TARGET_CODES)
     result = df.loc[mask].copy()
     
     # Parse date column for sorting
@@ -130,6 +132,9 @@ def load_master_file() -> pd.DataFrame:
                 df["Report_Date_as_MM_DD_YYYY"] = pd.to_datetime(
                     df["Report_Date_as_MM_DD_YYYY"], errors="coerce"
                 )
+            # CRITICAL: Ensure market code is string with leading zeros for dedup
+            if "CFTC_Contract_Market_Code" in df.columns:
+                df["CFTC_Contract_Market_Code"] = df["CFTC_Contract_Market_Code"].astype(str).str.zfill(6)
             print(f"Loaded master: {len(df)} existing rows")
             return df
         except Exception as e:
@@ -223,8 +228,13 @@ def save_master_file(df: pd.DataFrame):
     # Write with openpyxl
     if MASTER_FILE.exists():
         wb = load_workbook(MASTER_FILE)
+        # Remove current sheet name
         if SHEET_NAME in wb.sheetnames:
             del wb[SHEET_NAME]
+        # Remove legacy sheet name from previous script version
+        legacy_sheet = "WTI_PHYSICAL_NYMEX"
+        if legacy_sheet in wb.sheetnames:
+            del wb[legacy_sheet]
     else:
         wb = Workbook()
         if "Sheet" in wb.sheetnames:
