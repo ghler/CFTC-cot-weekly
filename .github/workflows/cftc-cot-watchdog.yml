@@ -9,8 +9,8 @@ on:
 
 permissions:
   contents: read
-  actions: read    # To read workflow run status
-  issues: write    # To create notification issue
+  actions: write     # Required for createWorkflowDispatch
+  issues: write      # Required for creating issues
 
 jobs:
   check-and-recover:
@@ -18,8 +18,8 @@ jobs:
     name: Verify Friday run & recover if needed
     permissions:
       contents: read
-      actions: read    # To read workflow run status
-      issues: write    # To create notification issue
+      actions: write     # Required for createWorkflowDispatch
+      issues: write      # Required for creating issues
     
     steps:
       - name: Get latest run of main workflow
