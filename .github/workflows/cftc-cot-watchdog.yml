@@ -9,13 +9,17 @@ on:
 
 permissions:
   contents: read
-  actions: read  # To read workflow run status
-  issues: write  # To create notification issue
+  actions: read    # To read workflow run status
+  issues: write    # To create notification issue
 
 jobs:
   check-and-recover:
     runs-on: ubuntu-latest
     name: Verify Friday run & recover if needed
+    permissions:
+      contents: read
+      actions: read    # To read workflow run status
+      issues: write    # To create notification issue
     
     steps:
       - name: Get latest run of main workflow
