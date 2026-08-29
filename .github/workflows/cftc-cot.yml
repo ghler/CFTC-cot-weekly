@@ -14,13 +14,13 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0  # Need full history for commit
       
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.5.0
         with:
           python-version: '3.11'
           cache: 'pip'
