@@ -116,8 +116,43 @@ jobs:
               workflow_id: 'cftc-cot.yml',
               ref: 'main'
             });
-            console.log('Re-triggered workflow dispatch');
+            console.log('Re-triggered workflow dispatch via API');
             return { triggered: true };
+      
+      - name: Wait and verify re-triggered run started
+        id: verify_retrigger
+        if: steps.retrigger.outputs.triggered == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Wait a bit for the workflow to appear in the runs list
+            await new Promise(r => setTimeout(r, 10000));
+            
+            // Check for a recent workflow_dispatch run
+            const { data: runs } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'cftc-cot.yml',
+              branch: 'main',
+              event: 'workflow_dispatch',
+              per_page: 3
+            });
+            
+            if (runs.workflow_runs.length > 0) {
+              const latest = runs.workflow_runs[0];
+              const runDate = new Date(latest.created_at);
+              const now = new Date();
+              const minsSince = (now - runDate) / (1000 * 60);
+              
+              console.log(`Latest workflow_dispatch run: #${latest.run_number} (${latest.status}/${latest.conclusion || 'pending'})`);
+              console.log(`Created: ${latest.created_at} (${minsSince.toFixed(1)} min ago)`);
+              
+              if (minsSince < 5) {
+                return { verified: true, run_number: latest.run_number, html_url: latest.html_url };
+              }
+            }
+            
+            return { verified: false };
       
       - name: Create notification issue if re-triggered or failed
         if: steps.retrigger.outputs.triggered == 'true' || steps.check_status.outputs.conclusion != 'success'
@@ -149,6 +184,9 @@ jobs:
             const status = '${{ steps.check_status.outputs.status }}';
             const htmlUrl = '${{ steps.check_status.outputs.html_url }}';
             const retriggered = '${{ steps.retrigger.outputs.triggered }}';
+            const verified = '${{ steps.verify_retrigger.outputs.verified }}';
+            const newRunNumber = '${{ steps.verify_retrigger.outputs.run_number }}';
+            const newRunUrl = '${{ steps.verify_retrigger.outputs.html_url }}';
             
             let title, body;
             
@@ -156,7 +194,8 @@ jobs:
               title = `🚨 COT Watchdog Alert: No Friday scheduled run found (${today})`;
               body = `**No scheduled workflow run was found for Friday's 20:00 UTC execution.**\n\n` +
                 `The watchdog checked at ${new Date().toISOString()} UTC and found no schedule-triggered runs.\n\n` +
-                `**Action taken:** ${retriggered === 'true' ? '✅ Re-triggered workflow via workflow_dispatch' : '❌ Could not re-trigger'}\n\n` +
+                `**Action taken:** ${retriggered === 'true' ? '✅ Re-triggered workflow via workflow_dispatch' : '❌ Could not re-trigger'}\n` +
+                `${verified === 'true' ? `✅ **Re-trigger verified**: Run #${newRunNumber} started ([view](${newRunUrl}))` : '⚠️ Re-trigger not yet visible in runs list (may take a few minutes)'}\n\n` +
                 `**Next steps:**\n` +
                 `1. Check the Actions tab for the main workflow: https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/cftc-cot.yml\n` +
                 `2. Verify the workflow file exists on the main branch\n` +
@@ -169,7 +208,8 @@ jobs:
                 `**Status:** ${status}\n` +
                 `**Conclusion:** ${conclusion}\n` +
                 `**Checked at:** ${new Date().toISOString()} UTC\n\n` +
-                `**Action taken:** ${retriggered === 'true' ? '✅ Re-triggered workflow via workflow_dispatch' : '❌ Could not re-trigger'}\n\n` +
+                `**Action taken:** ${retriggered === 'true' ? '✅ Re-triggered workflow via workflow_dispatch' : '❌ Could not re-trigger'}\n` +
+                `${verified === 'true' ? `✅ **Re-trigger verified**: Run #${newRunNumber} started ([view](${newRunUrl}))` : '⚠️ Re-trigger not yet visible in runs list'}\n\n` +
                 `**Next steps:**\n` +
                 `1. Check the failed run logs: ${htmlUrl}\n` +
                 `2. Check if re-triggered run succeeds\n` +
@@ -196,6 +236,11 @@ jobs:
           echo "- **Status**: ${{ steps.check_status.outputs.status }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Conclusion**: ${{ steps.check_status.outputs.conclusion }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Re-triggered**: ${{ steps.retrigger.outputs.triggered }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Re-trigger verified**: ${{ steps.verify_retrigger.outputs.verified }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.verify_retrigger.outputs.run_number }}" != "" ]; then
+            echo "- **New run #**: ${{ steps.verify_retrigger.outputs.run_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **New run URL**: ${{ steps.verify_retrigger.outputs.html_url }}" >> $GITHUB_STEP_SUMMARY
+          fi
           if [ "${{ steps.check_status.outputs.html_url }}" != "null" ]; then
-            echo "- **Run URL**: ${{ steps.check_status.outputs.html_url }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Original run URL**: ${{ steps.check_status.outputs.html_url }}" >> $GITHUB_STEP_SUMMARY
           fi
